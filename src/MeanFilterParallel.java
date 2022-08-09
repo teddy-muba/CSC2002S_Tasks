@@ -1,36 +1,45 @@
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.RecursiveTask;
 
 
-public class MeanFilterParallel {
-    public static final String SOURCE_FILE = "./src/image_input.jpg";
-    public static final String DESTINATION_FILE = "./src/image_output.jpg";
+public class MeanFilterParallel extends RecursiveAction {
 
-    public static void main(String[] args) throws IOException {
+    public BufferedImage originalImage;
+    public BufferedImage resultImage;
+    public int numberOfThreads;
 
-        BufferedImage originalImage = ImageIO.read(new File(SOURCE_FILE));
-        BufferedImage resultImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-
-        long startTime = System.currentTimeMillis();
-
-        //recolorSingleThreaded(originalImage, resultImage);
-        int numberOfThreads = 1;
-        recolorMultithreaded(originalImage, resultImage, numberOfThreads);
-        long endTime = System.currentTimeMillis();
-
-        long duration = endTime - startTime;
-
-        File outputFile = new File(DESTINATION_FILE);
-        ImageIO.write(resultImage, "jpg", outputFile);
-
-        System.out.println(String.valueOf(duration));
+    public MeanFilterParallel (BufferedImage originalImage, BufferedImage resultImage, int numberOfThreads) {
+        this.originalImage = originalImage;
+        this.resultImage = resultImage;
+        this.numberOfThreads = numberOfThreads;
     }
 
-    public static void recolorMultithreaded(BufferedImage originalImage, BufferedImage resultImage, int numberOfThreads) {
+    //recolorMultiThreaded(originalImage, resultImage);
+    @Override
+    protected void compute() {
+        {
+            // if the task is too large then we split it and execute the tasks in parallel
+
+            if (numberOfThreads > 1){
+                System.out.println("Parallel execution and split the task...");
+
+                MeanFilterParallel meanFilterParallel1 = new MeanFilterParallel(originalImage,resultImage,numberOfThreads/2);
+                MeanFilterParallel meanFilterParallel2 = new MeanFilterParallel(originalImage,resultImage,numberOfThreads/2);
+
+                meanFilterParallel1.fork();
+                meanFilterParallel2.fork();
+
+            } else{
+                System.out.println("The task is rather small so sequential execution is fine...");
+                System.out.println("The size of the task:" + numberOfThreads);
+
+            }
+
+        }
+
         List<Thread> threads = new ArrayList<>();
         int width = originalImage.getWidth();
         int height = originalImage.getHeight() / numberOfThreads;
@@ -39,13 +48,14 @@ public class MeanFilterParallel {
             final int threadMultiplier = i;
 
             Thread thread = new Thread(() -> {
-                int xOrigin = 0 ;
+                int xOrigin = 0;
                 int yOrigin = height * threadMultiplier;
 
                 recolorImage(originalImage, resultImage, xOrigin, yOrigin, width, height);
             });
 
             threads.add(thread);
+
         }
 
         for(Thread thread : threads) {
@@ -58,10 +68,6 @@ public class MeanFilterParallel {
             } catch (InterruptedException e) {
             }
         }
-    }
-
-    public static void recolorSingleThreaded(BufferedImage originalImage, BufferedImage resultImage) {
-        recolorImage(originalImage, resultImage, 0, 0, originalImage.getWidth(), originalImage.getHeight());
     }
 
     public static void recolorImage(BufferedImage originalImage, BufferedImage resultImage, int leftCorner, int topCorner,
@@ -126,7 +132,8 @@ public class MeanFilterParallel {
     }
 
     public static int getBlue(int rgb) {
-        return rgb & 0x000000FF >> 0;
+        return rgb & 0x000000FF;
     }
+
 }
 
