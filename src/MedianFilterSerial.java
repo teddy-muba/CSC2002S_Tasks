@@ -5,10 +5,6 @@ import java.io.IOException;
 
 public class MedianFilterSerial {
 
-    /**
-     * Optimizing for Latency Part 2 - Image Processing
-     * https://www.udemy.com/java-multithreading-concurrency-performance-optimization
-     */
     public static final String SOURCE_FILE = "./resources/many-flowers.jpg";
     public static final String DESTINATION_FILE = "./out/many-flowers.jpg";
 
