@@ -7,8 +7,8 @@ import java.util.List;
 
 
 public class MeanFilterParallel {
-    public static final String SOURCE_FILE = "./resources/many-flowers.jpg";
-    public static final String DESTINATION_FILE = "./out/many-flowers.jpg";
+    public static final String SOURCE_FILE = "./src/image_input.jpg";
+    public static final String DESTINATION_FILE = "./src/image_output.jpg";
 
     public static void main(String[] args) throws IOException {
 
@@ -16,6 +16,7 @@ public class MeanFilterParallel {
         BufferedImage resultImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_RGB);
 
         long startTime = System.currentTimeMillis();
+
         //recolorSingleThreaded(originalImage, resultImage);
         int numberOfThreads = 1;
         recolorMultithreaded(originalImage, resultImage, numberOfThreads);
