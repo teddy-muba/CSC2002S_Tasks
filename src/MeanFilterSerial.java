@@ -1,38 +1,19 @@
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 
 public class MeanFilterSerial {
+         public BufferedImage originalImage;
+         public BufferedImage resultImage;
 
-        public static final String SOURCE_FILE = "./src/image_input.jpg";
-        public static final String DESTINATION_FILE = "./src/image_output.jpg";
-
-        public static void main(String[] args) throws IOException {
-
-            BufferedImage originalImage = ImageIO.read(new File(SOURCE_FILE));
-            BufferedImage resultImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-
-            long startTime = System.currentTimeMillis();
-            //recolorSingleThreaded(originalImage, resultImage);
-            int numberOfThreads = 1;
-            long endTime = System.currentTimeMillis();
-
-            long duration = endTime - startTime;
-
-            File outputFile = new File(DESTINATION_FILE);
-            ImageIO.write(resultImage, "jpg", outputFile);
-
-            System.out.println(String.valueOf(duration));
+         public MeanFilterSerial(BufferedImage originalImage, BufferedImage resultImage) {
+              this.originalImage = originalImage;
+              this.resultImage = resultImage;
         }
 
-
-        public static void recolorSingleThreaded(BufferedImage originalImage, BufferedImage resultImage) {
+        public void recolorSingleThreaded(BufferedImage originalImage, BufferedImage resultImage) {
             recolorImage(originalImage, resultImage, 0, 0, originalImage.getWidth(), originalImage.getHeight());
         }
 
-        public static void recolorImage(BufferedImage originalImage, BufferedImage resultImage, int leftCorner, int topCorner,
+        public void recolorImage(BufferedImage originalImage, BufferedImage resultImage, int leftCorner, int topCorner,
                                         int width, int height) {
             for(int x = leftCorner ; x < leftCorner + width && x < originalImage.getWidth() ; x++) {
                 for(int y = topCorner ; y < topCorner + height && y < originalImage.getHeight() ; y++) {
@@ -41,7 +22,7 @@ public class MeanFilterSerial {
             }
         }
 
-        public static void recolorPixel(BufferedImage originalImage, BufferedImage resultImage, int x, int y) {
+        public void recolorPixel(BufferedImage originalImage, BufferedImage resultImage, int x, int y) {
             int rgb = originalImage.getRGB(x, y);
 
             int red = getRed(rgb);
@@ -65,15 +46,15 @@ public class MeanFilterSerial {
             setRGB(resultImage, x, y, newRGB);
         }
 
-        public static void setRGB(BufferedImage image, int x, int y, int rgb) {
+        public void setRGB(BufferedImage image, int x, int y, int rgb) {
             image.getRaster().setDataElements(x, y, image.getColorModel().getDataElements(rgb, null));
         }
 
-        public static boolean isShadeOfGray(int red, int green, int blue) {
+        public boolean isShadeOfGray(int red, int green, int blue) {
             return Math.abs(red - green) < 30 && Math.abs(red - blue) < 30 && Math.abs( green - blue) < 30;
         }
 
-        public static int createRGBFromColors(int red, int green, int blue) {
+        public int createRGBFromColors(int red, int green, int blue) {
             int rgb = 0;
 
             rgb |= blue;
@@ -85,15 +66,15 @@ public class MeanFilterSerial {
             return rgb;
         }
 
-        public static int getRed(int rgb) {
+        public int getRed(int rgb) {
             return (rgb & 0x00FF0000) >> 16;
         }
 
-        public static int getGreen(int rgb) {
+        public int getGreen(int rgb) {
             return (rgb & 0x0000FF00) >> 8;
         }
 
-        public static int getBlue(int rgb) {
+        public int getBlue(int rgb) {
             return rgb & 0x000000FF >> 0;
         }
     }

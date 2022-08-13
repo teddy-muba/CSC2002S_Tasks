@@ -2,7 +2,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.RecursiveTask;
 
 
 public class MeanFilterParallel extends RecursiveAction {
@@ -22,20 +21,13 @@ public class MeanFilterParallel extends RecursiveAction {
     protected void compute() {
         {
             // if the task is too large then we split it and execute the tasks in parallel
-
             if (numberOfThreads > 1){
-                System.out.println("Parallel execution and split the task...");
 
                 MeanFilterParallel meanFilterParallel1 = new MeanFilterParallel(originalImage,resultImage,numberOfThreads/2);
                 MeanFilterParallel meanFilterParallel2 = new MeanFilterParallel(originalImage,resultImage,numberOfThreads/2);
 
                 meanFilterParallel1.fork();
                 meanFilterParallel2.fork();
-
-            } else{
-                System.out.println("The task is rather small so sequential execution is fine...");
-                System.out.println("The size of the task:" + numberOfThreads);
-
             }
 
         }
@@ -70,7 +62,7 @@ public class MeanFilterParallel extends RecursiveAction {
         }
     }
 
-    public static void recolorImage(BufferedImage originalImage, BufferedImage resultImage, int leftCorner, int topCorner,
+    public void recolorImage(BufferedImage originalImage, BufferedImage resultImage, int leftCorner, int topCorner,
                                     int width, int height) {
         for(int x = leftCorner ; x < leftCorner + width && x < originalImage.getWidth() ; x++) {
             for(int y = topCorner ; y < topCorner + height && y < originalImage.getHeight() ; y++) {
@@ -79,39 +71,41 @@ public class MeanFilterParallel extends RecursiveAction {
         }
     }
 
-    public static void recolorPixel(BufferedImage originalImage, BufferedImage resultImage, int x, int y) {
-        int rgb = originalImage.getRGB(x, y);
+    public void recolorPixel(BufferedImage originalImage, BufferedImage resultImage, int x, int y) {
 
-        int red = getRed(rgb);
-        int green = getGreen(rgb);
-        int blue = getBlue(rgb);
 
-        int newRed;
-        int newGreen;
-        int newBlue;
+            int rgb = originalImage.getRGB(x, y);
 
-        if(isShadeOfGray(red, green, blue)) {
-            newRed = Math.min(255, red + 10);
-            newGreen = Math.max(0, green - 80);
-            newBlue = Math.max(0, blue - 20);
-        } else {
-            newRed = red;
-            newGreen = green;
-            newBlue = blue;
+            int red = getRed(rgb);
+            int green = getGreen(rgb);
+            int blue = getBlue(rgb);
+
+            int newRed;
+            int newGreen;
+            int newBlue;
+
+            if(isShadeOfGray(red, green, blue)) {
+                newRed = Math.min(255, red + 10);
+                newGreen = Math.max(0, green - 80);
+                newBlue = Math.max(0, blue - 20);
+            } else {
+                newRed = red;
+                newGreen = green;
+                newBlue = blue;
+            }
+            int newRGB = createRGBFromColors(newRed, newGreen, newBlue);
+            setRGB(resultImage, x, y, newRGB);
         }
-        int newRGB = createRGBFromColors(newRed, newGreen, newBlue);
-        setRGB(resultImage, x, y, newRGB);
-    }
 
-    public static void setRGB(BufferedImage image, int x, int y, int rgb) {
+    public void setRGB(BufferedImage image, int x, int y, int rgb) {
         image.getRaster().setDataElements(x, y, image.getColorModel().getDataElements(rgb, null));
     }
 
-    public static boolean isShadeOfGray(int red, int green, int blue) {
+    public boolean isShadeOfGray(int red, int green, int blue) {
         return Math.abs(red - green) < 30 && Math.abs(red - blue) < 30 && Math.abs( green - blue) < 30;
     }
 
-    public static int createRGBFromColors(int red, int green, int blue) {
+    public int createRGBFromColors(int red, int green, int blue) {
         int rgb = 0;
 
         rgb |= blue;
@@ -123,15 +117,15 @@ public class MeanFilterParallel extends RecursiveAction {
         return rgb;
     }
 
-    public static int getRed(int rgb) {
+    public int getRed(int rgb) {
         return (rgb & 0x00FF0000) >> 16;
     }
 
-    public static int getGreen(int rgb) {
+    public int getGreen(int rgb) {
         return (rgb & 0x0000FF00) >> 8;
     }
 
-    public static int getBlue(int rgb) {
+    public int getBlue(int rgb) {
         return rgb & 0x000000FF;
     }
 

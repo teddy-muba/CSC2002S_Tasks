@@ -1,8 +1,6 @@
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.RecursiveTask;
 
 
 public class MedianFilterParallel extends MeanFilterParallel {
@@ -17,19 +15,13 @@ public class MedianFilterParallel extends MeanFilterParallel {
         {
             // if the task is too large then we split it and execute the tasks in parallel
 
-            if (numberOfThreads > 1){
-                System.out.println("Parallel execution and split the task...");
+            if (numberOfThreads > 1) {
 
-                MedianFilterParallel medianFilterParallel1 = new MedianFilterParallel(originalImage,resultImage,numberOfThreads/2);
-                MedianFilterParallel medianFilterParallel2 = new MedianFilterParallel(originalImage,resultImage,numberOfThreads/2);
+                MedianFilterParallel medianFilterParallel1 = new MedianFilterParallel(originalImage, resultImage, numberOfThreads / 2);
+                MedianFilterParallel medianFilterParallel2 = new MedianFilterParallel(originalImage, resultImage, numberOfThreads / 2);
 
                 medianFilterParallel1.fork();
                 medianFilterParallel2.fork();
-
-            } else{
-                System.out.println("The task is rather small so sequential execution is fine...");
-                System.out.println("The size of the task:" + numberOfThreads);
-
             }
 
         }
