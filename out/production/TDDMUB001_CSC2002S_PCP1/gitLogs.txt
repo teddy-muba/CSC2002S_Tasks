@@ -1,0 +1,33 @@
+Last login: Sun Aug 14 20:51:40 on ttys000
+(base) teddymuba@cstechs-MacBook-Pro ~ % cd Documents
+(base) teddymuba@cstechs-MacBook-Pro Documents % cd JavaTuts
+(base) teddymuba@cstechs-MacBook-Pro JavaTuts % cd TDDMUB001_CSC2002S_PCP1
+(base) teddymuba@cstechs-MacBook-Pro TDDMUB001_CSC2002S_PCP1 % git init
+Reinitialized existing Git repository in /Users/teddymuba/Documents/JavaTuts/TDDMUB001_CSC2002S_PCP1/.git/
+(base) teddymuba@cstechs-MacBook-Pro TDDMUB001_CSC2002S_PCP1 % git log -all
+error: switch `l' expects a numerical value
+(base) teddymuba@cstechs-MacBook-Pro TDDMUB001_CSC2002S_PCP1 % git log --all
+commit a7173b1b46b91a16b3194fb5f1ceeba631016787 (HEAD -> master, origin/master)
+Author: teddy-muba <tddmub001@myuct.ac.za>
+Date:   Sun Aug 14 20:49:52 2022 +0200
+
+    Changes made to the parallel files and comments added to the codes
+
+commit 02aded2d84883ef90801f179ef2ae4febf64d0a6
+Author: teddy-muba <tddmub001@myuct.ac.za>
+Date:   Sun Aug 14 16:10:49 2022 +0200
+
+    Changes made to the parallel files
+
+commit ed972f236734f9f19ae9db94e28f538a833d1201
+Author: teddy-muba <tddmub001@myuct.ac.za>
+Date:   Sat Aug 13 18:18:08 2022 +0200
+
+    Changes made to the parallel files
+
+commit 72690792349bfba1a7b0456ee10c7fe2c0207d7f
+Author: teddy-muba <tddmub001@myuct.ac.za>
+Date:   Sat Aug 13 14:13:42 2022 +0200
+
+    Changes made to the parallel files
+:
