@@ -1,81 +1,134 @@
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
-public class MeanFilterSerial {
-         public BufferedImage originalImage;
-         public BufferedImage resultImage;
+public class MeanFilterSerial
+{
+    public String inputImageName;
+    public String outputImageName;
+    public int windowWidth;
+    public BufferedImage originalImage;
+    public BufferedImage resultImage;
 
-         public MeanFilterSerial(BufferedImage originalImage, BufferedImage resultImage) {
-              this.originalImage = originalImage;
-              this.resultImage = resultImage;
-        }
+    public static void main(String[] args)
+    {
 
-        public void recolorSingleThreaded(BufferedImage originalImage, BufferedImage resultImage) {
-            recolorImage(originalImage, resultImage, 0, 0, originalImage.getWidth(), originalImage.getHeight());
-        }
+        MeanFilterSerial meanFilterSerial = new MeanFilterSerial("./src/image_input.jpg",
+                "./src/image_output_mean_serial.jpg", "3");
+        meanFilterSerial.readImageInfo();
 
-        public void recolorImage(BufferedImage originalImage, BufferedImage resultImage, int leftCorner, int topCorner,
-                                        int width, int height) {
-            for(int x = leftCorner ; x < leftCorner + width && x < originalImage.getWidth() ; x++) {
-                for(int y = topCorner ; y < topCorner + height && y < originalImage.getHeight() ; y++) {
-                    recolorPixel(originalImage, resultImage, x , y);
-                }
+        long startTimeMeanParallel = System.currentTimeMillis();
+        int[][] myArray = meanFilterSerial.meanFilterImpl(meanFilterSerial.settingImage());
+        long endTimeMeanParallel = System.currentTimeMillis();
+        long durationMeanParallel = endTimeMeanParallel - startTimeMeanParallel;
+
+        System.out.println("The processing time for the mean filter serial is: " + durationMeanParallel + " milliseconds.");
+        BufferedImage image = new BufferedImage(myArray.length,myArray[0].length,BufferedImage.TYPE_INT_RGB);
+
+        for (int i=0;i<myArray.length;i++)
+        {
+            for (int j=0;j<myArray[0].length;j++)
+            {
+                image.setRGB(i,j,myArray[i][j]);
             }
         }
 
-        public void recolorPixel(BufferedImage originalImage, BufferedImage resultImage, int x, int y) {
-            int rgb = originalImage.getRGB(x, y);
-
-            int red = getRed(rgb);
-            int green = getGreen(rgb);
-            int blue = getBlue(rgb);
-
-            int newRed;
-            int newGreen;
-            int newBlue;
-
-            if(isShadeOfGray(red, green, blue)) {
-                newRed = Math.min(255, red + 10);
-                newGreen = Math.max(0, green - 80);
-                newBlue = Math.max(0, blue - 20);
-            } else {
-                newRed = red;
-                newGreen = green;
-                newBlue = blue;
-            }
-            int newRGB = createRGBFromColors(newRed, newGreen, newBlue);
-            setRGB(resultImage, x, y, newRGB);
+        try
+        {
+            ImageIO.write(image,"jpg",new File(meanFilterSerial.outputImageName));
         }
-
-        public void setRGB(BufferedImage image, int x, int y, int rgb) {
-            image.getRaster().setDataElements(x, y, image.getColorModel().getDataElements(rgb, null));
-        }
-
-        public boolean isShadeOfGray(int red, int green, int blue) {
-            return Math.abs(red - green) < 30 && Math.abs(red - blue) < 30 && Math.abs( green - blue) < 30;
-        }
-
-        public int createRGBFromColors(int red, int green, int blue) {
-            int rgb = 0;
-
-            rgb |= blue;
-            rgb |= green << 8;
-            rgb |= red << 16;
-
-            rgb |= 0xFF000000;
-
-            return rgb;
-        }
-
-        public int getRed(int rgb) {
-            return (rgb & 0x00FF0000) >> 16;
-        }
-
-        public int getGreen(int rgb) {
-            return (rgb & 0x0000FF00) >> 8;
-        }
-
-        public int getBlue(int rgb) {
-            return rgb & 0x000000FF >> 0;
+        catch (IOException e)
+        {
+            System.out.println("The image cannot be processed");
+            System.exit(0);
         }
     }
+
+    MeanFilterSerial(String inputImageName, String outputImageName, String windowWidth)
+    {
+        this.inputImageName=inputImageName;
+        this.outputImageName=outputImageName;
+        this.windowWidth=Integer.parseInt(windowWidth);
+    }
+
+
+    public void readImageInfo()
+    {
+        try
+        {
+            originalImage = ImageIO.read(new File(inputImageName));
+        }
+        catch (IOException e)
+        {
+            System.out.println("The image cannot be retrieved");
+            System.exit(0);
+        }
+
+        System.out.println(originalImage);
+        System.out.println(inputImageName+" "+outputImageName+" "+windowWidth);
+    }
+
+    public int[][] settingImage()
+    {
+        int height = originalImage.getHeight();
+        int width = originalImage.getWidth();
+        int[][] input = new int[width][height];
+
+        for (int x=0;x<width;x++)
+        {
+            for (int y=0;y<height;y++)
+            {
+                input[x][y]=originalImage.getRGB(x,y);
+            }
+        }
+        return input;
+    }
+
+    public int[][] meanFilterImpl(int[][] inputImg)
+    {
+        int[] alpha,red,blue,green;
+        int width= originalImage.getWidth();
+        int height= originalImage.getHeight();
+        int size = windowWidth*windowWidth;
+        int[][] output = new int[width][height];
+
+        for (int x=0; x<width; x++)
+        {
+            for (int y=0; y<height; y++)
+            {
+                int newAlpha = 0, newRed = 0, newBlue = 0, newGreen = 0, count = 0;
+                alpha = new int[size];
+                red = new int[size];
+                blue = new int[size];
+                green = new int[size];
+
+                for (int i=0; i<windowWidth; i++)
+                {
+                    for (int j=0; j<windowWidth; j++)
+                    {
+                        if(y+i< height&&x+j < width)
+                        {
+                            int pixel = inputImg[x+j][y+i];
+                            alpha[count] = (pixel >> 24) & 0xff;
+                            newAlpha += alpha[count];
+                            red[count] = (pixel >> 16) & 0xff;
+                            newRed += red[count];
+                            blue[count] = pixel & 0xff;
+                            newBlue += blue[count];
+                            green[count] = (pixel >> 8) & 0xff;
+                            newGreen += green[count];
+                            count++;
+                        }
+                    }
+                }
+
+                int newPixels = newAlpha<<24 | (newRed/size)<<16 | (newGreen/size)<<8 | (newBlue/size);
+                output[x][y] = newPixels;
+            }
+        }
+
+        return output;
+    }
+}
 
